@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>送给最爱的甜甜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            /* 浪漫动态渐变背景 */
+            background: linear-gradient(125deg, #0f0c29, #302b63, #240b36, #3a1c31);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            /* 禁止选中文字 */
+            user-select: none;
+        }
+
+        /* 背景渐变动画 */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ================= 修改：飘落爱心的动画与位置 ================= */
+        @keyframes fall {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0; }
+        }
+        
+        .heart {
+            position: fixed; /* 修改为 fixed，相对于整个浏览器窗口定位 */
+            top: -30px;      /* 关键修改：让爱心的初始位置在屏幕最上方外面一点点 */
+            color: rgba(255, 105, 180, 0.5); /* 半透明粉色 */
+            pointer-events: none; /* 让鼠标穿透爱心，不影响照片 */
+            z-index: 0;
+            text-shadow: 0 0 5px rgba(255, 105, 180, 0.8);
+        }
+        /* ========================================================= */
+
+        /* 场景容器 */
+        #perspective {
+            perspective: 800px; 
+            position: relative;
+            z-index: 10; /* 保证相册在爱心前面 */
+        }
+
+        /* 相册容器 */
+        #wrap {
+            width: 120px;
+            height: 180px;
+            margin: 200px auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-10deg) rotateY(0deg);
+        }
+
+        /* 图片样式 */
+        #wrap img {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px #fff;
+            -webkit-box-reflect: below 10px -webkit-linear-gradient(top, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        #wrap img:hover {
+            box-shadow: 0 0 20px #ff69b4;
+            transform: scale(1.1);
+        }
+
+        /* 底座光晕 */
+        #visual {
+            width: 1200px;
+            height: 1200px;
+            background: -webkit-radial-gradient(center center, 600px 600px, rgba(244, 23, 234, 0.2), rgba(0, 0, 0, 0));
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            margin-left: -600px;
+            margin-top: -600px;
+            transform: rotateX(90deg);
+        }
+
+        /* 提示文字 */
+        .text {
+            color: #ffb6c1;
+            text-align: center;
+            font-family: "Microsoft YaHei";
+            margin-top: 50px;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px #ff69b4;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 遮罩层样式 */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); 
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; 
+            cursor: zoom-out; 
+        }
+
+        #overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 3px solid #ff69b4;
+            border-radius: 10px;
+            box-shadow: 0 0 30px #ff69b4;
+            animation: zoomIn 0.3s ease; 
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text">✨ 亲爱的宝宝，我想为你创造一个独属于你的相册  ✨</div>
+
+    <div id="perspective">
+        <div id="wrap">
+            <img src="1.jpg" alt="photo">
+            <img src="2.jpg" alt="photo">
+            <img src="3.jpg" alt="photo">
+            <img src="4.jpg" alt="photo">
+            <img src="5.jpg" alt="photo">
+            <img src="6.jpg" alt="photo">
+            <img src="7.jpg" alt="photo">
+            <img src="8.jpg" alt="photo">
+            <img src="9.jpg" alt="photo">
+            <img src="10.jpg" alt="photo">
+            <img src="11.jpg" alt="photo">
+
+            <div id="visual"></div>
+        </div>
+    </div>
+
+    <!-- 放大查看的容器 -->
+    <div id="overlay">
+        <img id="largeImg" src="" alt="大图">
+    </div>
+
+    <script>
+        window.onload = function () {
+            // 动态生成飘落爱心
+            function createHearts() {
+                var heart = document.createElement('div');
+                heart.innerHTML = '❤';
+                heart.className = 'heart';
+                
+                // 随机水平位置
+                heart.style.left = Math.random() * 100 + 'vw';
+                // 随机大小 (10px 到 25px)
+                var size = Math.random() * 15 + 10; 
+                heart.style.fontSize = size + 'px';
+                // 随机下落时间 (4秒到8秒)
+                var duration = Math.random() * 4 + 4; 
+                heart.style.animation = 'fall ' + duration + 's linear forwards';
+                
+                document.body.appendChild(heart);
+
+                // 动画结束后移除元素
+                setTimeout(function() {
+                    heart.remove();
+                }, duration * 1000);
+            }
+            // 每隔 400 毫秒生成一个爱心
+            setInterval(createHearts, 400);
+
+            var oWrap = document.getElementById('wrap');
+            var oImg = oWrap.getElementsByTagName('img');
+            var oImgLen = oImg.length;
+            var deg = 360 / oImgLen; 
+
+            var overlay = document.getElementById('overlay');
+            var largeImg = document.getElementById('largeImg');
+            var isDragging = false; 
+
+            // 1. 初始化图片布局
+            for (var i = 0; i < oImgLen; i++) {
+                oImg[i].style.transform = "rotateY(" + i * deg + "deg) translateZ(350px)";
+                oImg[i].style.transition = "transform 1s " + (oImgLen - 1 - i) * 0.1 + "s";
+                
+                oImg[i].onclick = function() {
+                    if (isDragging) return; 
+                    largeImg.src = this.src; 
+                    overlay.style.display = 'flex'; 
+                };
+            }
+
+            overlay.onclick = function() {
+                this.style.display = 'none';
+            };
+
+            // 2. 拖拽逻辑
+            var lastX, lastY, nowX, nowY, minusX, minusY;
+            var roY = 0, roX = -10;
+            var timer;
+
+            document.onmousedown = function (ev) {
+                clearInterval(timer);
+                var ev = ev || window.event;
+                lastX = ev.clientX;
+                lastY = ev.clientY;
+                isDragging = false; 
+
+                this.onmousemove = function (ev) {
+                    var ev = ev || window.event;
+                    nowX = ev.clientX;
+                    nowY = ev.clientY;
+
+                    minusX = nowX - lastX;
+                    minusY = nowY - lastY;
+
+                    if (Math.abs(minusX) > 2 || Math.abs(minusY) > 2) {
+                        isDragging = true; 
+                    }
+
+                    roY += minusX * 0.2;
+                    roX -= minusY * 0.1;
+
+                    oWrap.style.transform = "rotateX(" + roX + "deg) rotateY(" + roY + "deg)";
+
+                    lastX = nowX;
+                    lastY = nowY;
+                }
+
+                this.onmouseup = function () {
+                    this.onmousemove = null;
+                    timer = setInterval(function () {
+                        minusX *= 0.95;
+                        minusY *= 0.95;
+                        roY += minusX * 0.2;
+                        roX -= minusY * 0.1;
+                        oWrap.style.transform = "rotateX(" + roX + "deg) rotateY(" + roY + "deg)";
+                        if (Math.abs(minusX) < 0.1 && Math.abs(minusY) < 0.1) {
+                            clearInterval(timer);
+                        }
+                    }, 13);
+                }
+                return false; 
+            }
+        }
+    </script>
+</body>
+</html>
