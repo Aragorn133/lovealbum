@@ -25,27 +25,26 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ================= 修改：飘落爱心的动画与位置 ================= */
+        /* 飘落爱心的动画与位置 */
         @keyframes fall {
             0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0; }
         }
         
         .heart {
-            position: fixed; /* 修改为 fixed，相对于整个浏览器窗口定位 */
-            top: -30px;      /* 关键修改：让爱心的初始位置在屏幕最上方外面一点点 */
-            color: rgba(255, 105, 180, 0.5); /* 半透明粉色 */
-            pointer-events: none; /* 让鼠标穿透爱心，不影响照片 */
+            position: fixed; 
+            top: -30px;      
+            color: rgba(255, 105, 180, 0.5); 
+            pointer-events: none; 
             z-index: 0;
             text-shadow: 0 0 5px rgba(255, 105, 180, 0.8);
         }
-        /* ========================================================= */
 
         /* 场景容器 */
         #perspective {
             perspective: 800px; 
             position: relative;
-            z-index: 10; /* 保证相册在爱心前面 */
+            z-index: 10; 
         }
 
         /* 相册容器 */
@@ -133,8 +132,12 @@
     </style>
 </head>
 <body>
+    <!-- 这里去掉了 autoplay，因为我们要用代码触发 -->
+    <audio id="myAudio" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
 
-    <div class="text">✨ 亲爱的宝宝，我想为你创造一个独属于你的相册  ✨</div>
+    <div class="text">✨ 亲爱的宝宝，我想为你创造一个独属于你的相册 ✨</div>
 
     <div id="perspective">
         <div id="wrap">
@@ -149,7 +152,6 @@
             <img src="9.jpg" alt="photo">
             <img src="10.jpg" alt="photo">
             <img src="11.jpg" alt="photo">
-
             <div id="visual"></div>
         </div>
     </div>
@@ -160,6 +162,22 @@
     </div>
 
     <script>
+        // ================= 新增：解决音乐无法自动播放的问题 =================
+        // 只要用户在页面上点击（或者在手机上触摸）任意位置，就开始播放音乐
+        function playMusic() {
+            var audio = document.getElementById('myAudio');
+            if (audio.paused) {
+                audio.play();
+            }
+            // 播放成功后，为了防止重复触发，移除监听
+            document.removeEventListener('click', playMusic);
+            document.removeEventListener('touchstart', playMusic);
+        }
+        
+        document.addEventListener('click', playMusic);
+        document.addEventListener('touchstart', playMusic); // 适配手机端触摸
+        // ==============================================================
+
         window.onload = function () {
             // 动态生成飘落爱心
             function createHearts() {
